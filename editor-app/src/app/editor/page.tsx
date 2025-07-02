@@ -4,17 +4,23 @@ import Navbar from "@/components/editor/Navbar";
 import SidePanel from "@/components/editor/SidePanel";
 import { useEditor } from "@/context/editor";
 import ImageEditor from "@/lib/ImageEditor";
+import { ThemeTypes } from "@/types";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
 export default function Editor() {
   const { panelOptions, panelDispatch } = useEditor();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<ImageEditor | null>(null);
+
+  const { resolvedTheme } = useTheme();
 
   function resizeCanvasToContainer() {
     if (canvasContainerRef.current && canvasRef.current) {
       const containerWidth = canvasContainerRef.current.clientWidth;
       const containerHeight = canvasContainerRef.current.clientHeight;
+      // Set the canvas size to match the container size
       canvasRef.current.width = containerWidth;
       canvasRef.current.height = containerHeight;
       canvasRef.current.style.width = `${containerWidth}px`;
@@ -25,12 +31,17 @@ export default function Editor() {
   useEffect(() => {
     resizeCanvasToContainer();
     window.addEventListener("resize", resizeCanvasToContainer);
-    const imageEditor = new ImageEditor(canvasRef.current!);
+    editorRef.current = new ImageEditor(canvasRef.current!);
     return () => {
       window.removeEventListener("resize", resizeCanvasToContainer);
-      imageEditor.destroy();
+      editorRef.current?.destroy();
     };
   }, []);
+
+  useEffect(() => {
+    // debugger;
+    editorRef.current?.setTheme((resolvedTheme) as ThemeTypes);
+  }, [resolvedTheme]);
 
   return (
     <main className="h-dvh flex flex-col ">
@@ -50,10 +61,7 @@ export default function Editor() {
           ref={canvasContainerRef}
           className="flex-1 h-full box-border relative overflow-hidden dark:bg-gray-900 bg-gray-100 "
         >
-          <canvas
-            ref={canvasRef}
-            className="absolute"
-          ></canvas>
+          <canvas ref={canvasRef} className="absolute"></canvas>
         </section>
         <SidePanel
           sidePanelOptions={panelOptions.right}

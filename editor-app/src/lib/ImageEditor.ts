@@ -2,6 +2,7 @@
  *  Image Editor manages the DOM levels events of the canvas
  *  Like : Drag, Paste, Copy, etc
  */
+import { ThemeTypes } from "@/types";
 import { Canvas, FabricText, Rect } from "fabric";
 export default class ImageEditor {
   canvas: HTMLCanvasElement;
@@ -9,7 +10,7 @@ export default class ImageEditor {
 
   // Release all the resources and event listeners
   destroy() {
-    this.fabricCanvas?.destroy();
+    this.fabricCanvas?.dispose();
   }
 
   constructor(canvas: HTMLCanvasElement) {
@@ -24,6 +25,12 @@ export default class ImageEditor {
     });
 
     this.init();
+  }
+
+  setTheme(theme: ThemeTypes) {
+    this.fabricCanvas.backgroundColor =
+      theme === "dark" ? "#1a1a1a" : "#ffffff";
+    this.fabricCanvas.requestRenderAll(); // Force render
   }
 
   setSize(width: number, height: number) {
